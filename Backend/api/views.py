@@ -8,6 +8,7 @@ from rest_framework import status
 from django.core.exceptions import ValidationError
 from django.core.exceptions import MultipleObjectsReturned
 from django.contrib.auth.models import User
+from rest_framework.authtoken.models import Token
 
 # Create your views here.
 
@@ -70,19 +71,19 @@ class SignInView(APIView):
     permission_classes = [AllowAny]  # Allow any user to access this view
 
     def post(self, request):
-        phone_number = request.data.get('phone_number')
+        email = request.data.get('email')
         password = request.data.get('password')
 
-        if not phone_number or not password:
+        if not email or not password:
             return Response({'message': 'Please provide both phone number and password.'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Check if the UserProfile exists for the given phone_number
-        user_profile = UserProfile.objects.filter(phone_number=phone_number).first()
+        user_profile = User.objects.filter(email=email).first()
         if user_profile is None:
             return Response({'message': 'Phone number not found.'}, status=status.HTTP_404_NOT_FOUND)
 
         try:
-            user = user_profile.user  # Get the associated User
+            user = user_profile  # Get the associated User
 
             # Authenticate the user
             if user.check_password(password):
