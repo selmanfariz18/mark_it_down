@@ -1,21 +1,33 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add your authentication logic here
-    console.log("Email:", email);
-    console.log("Password:", password);
+    setError("");
+
+    try {
+      const response = await axios.post("http://localhost:8000/api/signin/", {
+        email,
+        password,
+      });
+      localStorage.setItem("token", response.data.token);
+      navigate("/dashboard");
+    } catch (error) {
+      setError(error.response?.data?.message || "Login failed.");
+    }
   };
 
   return (
-    <div className="register">
+    <div className="login">
       <h1>Login</h1>
+      {error && <p style={{ color: "red" }}>{error}</p>}
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
           <input
@@ -39,11 +51,13 @@ const Login = () => {
         </div>
         <div className="mb-3">
           <button
-            type="button"
+            type="submit"
             className="btn btn-link"
-            onClick={() => navigate("/forgot-password")}
+            onClick={() => {
+              navigate("/register");
+            }}
           >
-            Forgot Password?
+            New here? Register Now
           </button>
         </div>
         <button type="submit" className="btn btn-primary">
