@@ -10,7 +10,8 @@ from django.core.exceptions import ValidationError
 from django.core.exceptions import MultipleObjectsReturned
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
-from api.models import Project
+from api.models import Project, Task
+from django.shortcuts import get_object_or_404
 
 # Create your views here.
 
@@ -168,3 +169,103 @@ class ProjectListView(APIView):
         ]
         
         return Response(project_list, status=status.HTTP_200_OK)
+    
+class ProjectDetailView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [AllowAny]    
+    
+    def get(self, request, project_id):
+        # Ensure the user is authenticated
+        user = request.user
+        if not user.is_authenticated:
+            return Response({"error": "Authentication required"}, status=401)
+        
+        # Get the project by ID, or return 404 if not found
+        project = get_object_or_404(Project, id=project_id, created_by=user)
+
+        # Get related tasks for this project
+        tasks = Task.objects.filter(report = project)
+
+        # Prepare the tasks data
+        task_data = []
+        for task in tasks:
+            task_data.append({
+                "id": task.id,
+                "description": task.description,
+                "status": task.status,
+                "created_date": task.created_date,
+                "last_updated_on": task.last_updated_on
+            })
+
+        # Prepare the response data
+        response_data = {
+            "id": project.id,
+            "title": project.title,
+            "created_date": project.created_date,
+            "tasks": task_data
+        }
+
+        # Return the project details and tasks as JSON
+        return Response(response_data, status=200)
+    
+class AddTaskView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [AllowAny]
+    def post(self, request, project_id):
+        # Ensure the user is authenticated
+        user = request.user
+        if not user.is_authenticated:
+            return Response({"error": "Authentication required"}, status=401)
+
+        # Fetch the project to which we will add the task
+        project = get_object_or_404(Project, id=project_id, created_by=user)
+
+        # Get the task description from the request body
+        task_description = request.data.get("description")
+
+        if not task_description:
+            return Response({"error": "Task description is required"}, status=400)
+
+        # Create the new task
+        task = Task.objects.create(
+            report=project,
+            description=task_description,
+            status="not_done",  # The task is initially unchecked
+            created_date=datetime.now(),  
+            last_updated_on=datetime.now(),  
+        )
+
+        return Response({
+            "id": task.id,
+            "description": task.description,
+            "status": task.status,
+            "created_date": task.created_date,
+            "last_updated_on": task.last_updated_on,
+        }, status=201)
+        
+class UpdateTaskStatusView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [AllowAny]
+    
+    def patch(self, request, task_id):
+        user = request.user
+        if not user.is_authenticated:
+            return Response({"error": "Authentication required"}, status=401)
+
+        task = get_object_or_404(Task, id=task_id)
+
+        # Only the creator of the task can change its status
+        if task.report.created_by != user:
+            return Response({"error": "Permission denied"}, status=403)
+
+        # Set the current datetime
+        task.last_updated_on = datetime.now()  # Use datetime for both date and time
+        task.status = 'done' if task.status == 'not_done' else 'not_done'
+        task.save()
+
+        return Response({
+            "id": task.id,
+            "description": task.description,
+            "status": task.status,
+            "last_updated_on": task.last_updated_on,  # Include last_updated_on in response
+        })
