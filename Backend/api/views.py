@@ -1,3 +1,4 @@
+from datetime import date
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
@@ -9,6 +10,7 @@ from django.core.exceptions import ValidationError
 from django.core.exceptions import MultipleObjectsReturned
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
+from api.models import Project
 
 # Create your views here.
 
@@ -80,7 +82,7 @@ class SignInView(APIView):
         # Check if the UserProfile exists for the given phone_number
         user_profile = User.objects.filter(email=email).first()
         if user_profile is None:
-            return Response({'message': 'Phone number not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'message': 'Email not found.'}, status=status.HTTP_404_NOT_FOUND)
 
         try:
             user = user_profile  # Get the associated User
@@ -107,3 +109,38 @@ class TokenValidationView(APIView):
     def get(self, request):
         # If the request reaches this point, the token is valid
         return Response({'message': 'Token is valid.'}, status=status.HTTP_200_OK)
+    
+    
+    
+#################Project views#################
+
+
+class CreateProject(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+      
+        user = request.user
+        if not user.is_authenticated:
+            return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        
+        title = request.data.get('title')
+        if not title:
+            return Response({"error": "Project title is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+       
+        project = Project.objects.create(
+            created_by=user,
+            title=title,
+            created_date=date.today()
+        )
+        
+        # Return a simple response with project details
+        return Response({
+            "id": project.id,
+            "title": project.title,
+            "created_date": project.created_date,
+            "created_by": project.created_by.username
+        }, status=status.HTTP_201_CREATED)
