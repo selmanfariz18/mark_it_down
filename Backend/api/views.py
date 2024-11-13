@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
@@ -134,7 +134,7 @@ class CreateProject(APIView):
         project = Project.objects.create(
             created_by=user,
             title=title,
-            created_date=date.today()
+            created_date=datetime.now()
         )
         
         # Return a simple response with project details
@@ -144,3 +144,27 @@ class CreateProject(APIView):
             "created_date": project.created_date,
             "created_by": project.created_by.username
         }, status=status.HTTP_201_CREATED)
+        
+class ProjectListView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        user = request.user
+        if not user.is_authenticated:
+            return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        # Fetch all projects created by the logged-in user
+        projects = Project.objects.filter(created_by=user)
+
+        # Manually create a list of project dictionaries
+        project_list = [
+            {
+                "id": project.id,
+                "title": project.title,
+                "created_date": project.created_date
+            }
+            for project in projects
+        ]
+        
+        return Response(project_list, status=status.HTTP_200_OK)
