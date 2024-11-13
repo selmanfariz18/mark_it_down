@@ -10,6 +10,8 @@ const Detail = () => {
   const [projectDetails, setProjectDetails] = useState(null);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [taskName, setTaskName] = useState("");
+  const [isEditing, setIsEditing] = useState(null); // To track which task is being edited
+  const [editedDescription, setEditedDescription] = useState("");
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -67,7 +69,6 @@ const Detail = () => {
       );
 
       if (response.status === 201) {
-        // toast.success("Task added successfully!");
         setProjectDetails((prevDetails) => {
           return {
             ...prevDetails,
@@ -97,7 +98,6 @@ const Detail = () => {
       );
 
       if (response.status === 200) {
-        // toast.success("Task status updated!");
         setProjectDetails((prevDetails) => {
           const updatedTasks = prevDetails.tasks.map((task) =>
             task.id === taskId ? { ...task, status: newStatus } : task
@@ -105,8 +105,55 @@ const Detail = () => {
           return { ...prevDetails, tasks: updatedTasks };
         });
       }
+      // window.location.reload();
     } catch (error) {
       toast.error("Failed to update task status.");
+    }
+  };
+
+  const handleEditTask = (taskId, currentDescription) => {
+    setIsEditing(taskId);
+    setEditedDescription(currentDescription);
+  };
+
+  const handleSaveTask = async (taskId) => {
+    const token = localStorage.getItem("token");
+    if (!editedDescription) {
+      toast.error("Task description cannot be empty.");
+      return;
+    }
+
+    try {
+      const response = await axios.patch(
+        `http://localhost:8000/api/tasks/${taskId}/update_description/`,
+        { description: editedDescription },
+        {
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        //window.location.reload();
+        toast.success("Task updated successfully!");
+        setProjectDetails((prevDetails) => {
+          const updatedTasks = prevDetails.tasks.map((task) =>
+            task.id === taskId
+              ? {
+                  ...task,
+                  description: editedDescription,
+                  last_updated_on: response.data.last_updated_on,
+                }
+              : task
+          );
+          return { ...prevDetails, tasks: updatedTasks };
+        });
+        setIsEditing(null);
+        setEditedDescription("");
+      }
+    } catch (error) {
+      toast.error("Failed to update task.");
     }
   };
 
@@ -147,10 +194,36 @@ const Detail = () => {
                 type="checkbox"
                 onChange={() => handleCheckboxChange(task.id, task.status)}
               />
-              <h5 className="mt-3 mx-2 bg-white">{task.description}</h5>
-              <p className="mt-3 mx-2 bg-white text-muted">
-                Last Updated: {new Date(task.last_updated_on).toLocaleString()}
-              </p>
+              {isEditing === task.id ? (
+                <>
+                  <input
+                    type="text"
+                    value={editedDescription}
+                    onChange={(e) => setEditedDescription(e.target.value)}
+                    className="mt-3 mx-2 bg-white form-control"
+                  />
+                  <button
+                    className="btn btn-success mt-3"
+                    onClick={() => handleSaveTask(task.id)}
+                  >
+                    Done
+                  </button>
+                </>
+              ) : (
+                <>
+                  <h5 className="mt-3 mx-2 bg-white">{task.description}</h5>
+                  <p className="mt-3 mx-2 bg-white text-muted">
+                    Last Updated:{" "}
+                    {new Date(task.last_updated_on).toLocaleString()}
+                  </p>
+                  <button
+                    className="btn btn-warning mt-3"
+                    onClick={() => handleEditTask(task.id, task.description)}
+                  >
+                    Edit
+                  </button>
+                </>
+              )}
             </div>
           ))}
         </div>
@@ -187,7 +260,6 @@ const Detail = () => {
 
         {/* Checked Tasks */}
         <div className="lists bg-white m-5 px-5">
-          {/* <h5>Checked Tasks</h5> */}
           {checkedTasks.map((task) => (
             <div key={task.id} className="list d-flex bg-white">
               <input
