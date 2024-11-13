@@ -86,6 +86,8 @@
 .project-list {
   display: flex;
   flex-direction: row;
+  align-items: center;
+  justify-content: center;
   gap: 15px; /* Space between cards */
 }
 
@@ -93,4 +95,8 @@
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.popup_h, .popup_form{
+  background-color: #f1f1f1;
 }

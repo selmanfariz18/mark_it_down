@@ -10,20 +10,43 @@ const Dashboard = () => {
   const [projectName, setProjectName] = useState("");
   const [error, setError] = useState("");
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [projects, setProjects] = useState([]);
   const navigate = useNavigate();
 
+  // Fetch token from localStorage and redirect if not found
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
       navigate("/login");
+    } else {
+      fetchProjects(token);
     }
   }, [navigate]);
 
+  // Function to fetch projects from the API
+  const fetchProjects = async (token) => {
+    try {
+      const response = await axios.get("http://localhost:8000/api/projects/", {
+        headers: {
+          Authorization: `Token ${token}`,
+        },
+      });
+
+      if (response.status === 200) {
+        setProjects(response.data);
+      }
+    } catch (error) {
+      toast.error("Failed to fetch projects");
+    }
+  };
+
+  // Handle Logout
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/login");
   };
 
+  // Handle Project Creation
   const handleProjectSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -43,19 +66,17 @@ const Dashboard = () => {
 
       if (response.status === 201) {
         setProjectName("");
-
         toast.success("Project Created Successfully!");
 
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
+        // Refresh projects list
+        fetchProjects(token);
+        setIsPopupOpen(false);
       }
     } catch (error) {
       const errorMsg =
         error.response?.data?.message || "Project Creation Failed";
       setError(errorMsg);
-
-      toast.error(errorMsg, {});
+      toast.error(errorMsg);
     }
   };
 
@@ -71,8 +92,8 @@ const Dashboard = () => {
       </div>
 
       <div className="projects bg-white mx-5 p-3">
-        <div className="project_header d-flex justify-content-between">
-          <h3 className="heading">Projects</h3>
+        <div className="project_header d-flex justify-content-between bg-white">
+          <h3 className="heading bg-white">Projects</h3>
           <Popup
             open={isPopupOpen}
             onClose={() => setIsPopupOpen(false)}
@@ -85,8 +106,8 @@ const Dashboard = () => {
               textAlign: "center",
             }}
           >
-            <div className="mb-3">New Project</div>
-            <form onSubmit={handleProjectSubmit}>
+            <div className="mb-3 popup_h">New Project</div>
+            <form onSubmit={handleProjectSubmit} className="popup_form">
               <input
                 type="text"
                 value={projectName}
@@ -101,28 +122,21 @@ const Dashboard = () => {
             </form>
           </Popup>
         </div>
-        <div className="project-list bg-white">
-          {/* Project Cards */}
-          <div className="project-card card mb-2 p-3">
-            <h5>Project 1</h5>
-            <p>Created on: 2024-11-10</p>
-          </div>
-          <div className="project-card card mb-2 p-3">
-            <h5>Project 2</h5>
-            <p>Created on: 2024-11-11</p>
-          </div>
-          <div className="project-card card mb-2 p-3">
-            <h5>Project 3</h5>
-            <p>Created on: 2024-11-12</p>
-          </div>
-          <div className="project-card card mb-2 p-3">
-            <h5>Project 4</h5>
-            <p>Created on: 2024-11-13</p>
-          </div>
-          <div className="project-card card mb-2 p-3">
-            <h5>Project 5</h5>
-            <p>Created on: 2024-11-14</p>
-          </div>
+
+        <div className="project-list bg-white row">
+          {projects.length > 0 ? (
+            projects.map((project) => (
+              <div
+                key={project.id}
+                className="project-card card mb-2 p-3 col-md-3"
+              >
+                <h5 className="bg-white">{project.title}</h5>
+                <p className="bg-white">Created on: {project.created_date}</p>
+              </div>
+            ))
+          ) : (
+            <p className="bg-white mt-5 text-center">No projects available</p>
+          )}
         </div>
       </div>
     </>
