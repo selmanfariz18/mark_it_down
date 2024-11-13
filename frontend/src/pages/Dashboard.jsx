@@ -13,7 +13,6 @@ const Dashboard = () => {
   const [projects, setProjects] = useState([]);
   const navigate = useNavigate();
 
-  // Fetch token from localStorage and redirect if not found
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -23,7 +22,6 @@ const Dashboard = () => {
     }
   }, [navigate]);
 
-  // Function to fetch projects from the API
   const fetchProjects = async (token) => {
     try {
       const response = await axios.get("http://localhost:8000/api/projects/", {
@@ -31,7 +29,6 @@ const Dashboard = () => {
           Authorization: `Token ${token}`,
         },
       });
-
       if (response.status === 200) {
         setProjects(response.data);
       }
@@ -40,13 +37,15 @@ const Dashboard = () => {
     }
   };
 
-  // Handle Logout
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/login");
   };
 
-  // Handle Project Creation
+  const handleCardClick = (projectId) => {
+    navigate(`/project/${projectId}`);
+  };
+
   const handleProjectSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -67,8 +66,6 @@ const Dashboard = () => {
       if (response.status === 201) {
         setProjectName("");
         toast.success("Project Created Successfully!");
-
-        // Refresh projects list
         fetchProjects(token);
         setIsPopupOpen(false);
       }
@@ -83,7 +80,6 @@ const Dashboard = () => {
   return (
     <>
       <ToastContainer />
-
       <div className="dashboard text-center m-3 mt-3 d-flex justify-content-between">
         <h1>Mark it Down</h1>
         <button onClick={handleLogout} className="btn btn-danger">
@@ -129,6 +125,7 @@ const Dashboard = () => {
               <div
                 key={project.id}
                 className="project-card card mb-2 p-3 col-md-3"
+                onClick={() => handleCardClick(project.id)}
               >
                 <h5 className="bg-white">{project.title}</h5>
                 <p className="bg-white">Created on: {project.created_date}</p>
