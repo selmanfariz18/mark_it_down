@@ -1,33 +1,42 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
 
     try {
       const response = await axios.post("http://localhost:8000/api/signin/", {
         email,
         password,
       });
+
       localStorage.setItem("token", response.data.token);
-      navigate("/dashboard");
+
+      toast.success("Login Successful!");
+
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 2000);
     } catch (error) {
-      setError(error.response?.data?.message || "Login failed.");
+      const errorMsg = error.response?.data?.message || "Login failed.";
+      toast.error(errorMsg);
     }
   };
 
   return (
     <div className="login">
+      <ToastContainer />
+
       <h1>Login</h1>
-      {error && <p style={{ color: "red" }}>{error}</p>}
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
           <input
@@ -51,11 +60,9 @@ const Login = () => {
         </div>
         <div className="mb-3">
           <button
-            type="submit"
+            type="button"
             className="btn btn-link"
-            onClick={() => {
-              navigate("/register");
-            }}
+            onClick={() => navigate("/register")}
           >
             New here? Register Now
           </button>
