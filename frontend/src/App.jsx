@@ -3,6 +3,7 @@ import "./App.css";
 import Login from "./pages/login";
 import Register from "./pages/register";
 import Dashboard from "./pages/Dashboard";
+import Detail from "./pages/Detail";
 import Pagenotfound from "./pages/PageNotFound";
 
 function PrivateRoute({ children }) {
@@ -22,6 +23,14 @@ function App() {
           element={
             <PrivateRoute>
               <Dashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/details"
+          element={
+            <PrivateRoute>
+              <Detail />
             </PrivateRoute>
           }
         />

@@ -75,7 +75,7 @@
 }
 
 /* ============Projects=============== */
-.projects {
+.projects, .Detail {
   height: 700px;
   overflow-y: auto; /* Vertical scroll enabled */
   border-radius: 8px;
@@ -99,4 +99,9 @@
 
 .popup_h, .popup_form{
   background-color: #f1f1f1;
+}
+
+/* ====================Detail page=============== */
+.add_button{
+  margin-left: 80px;
 }
