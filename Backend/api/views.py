@@ -269,3 +269,38 @@ class UpdateTaskStatusView(APIView):
             "status": task.status,
             "last_updated_on": task.last_updated_on,  # Include last_updated_on in response
         })
+        
+class UpdateTaskDescriptionView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, task_id):
+        
+        try:
+            task = Task.objects.get(id=task_id)
+        except Task.DoesNotExist:
+            return Response({"detail": "Task not found."}, status=404)
+
+        
+        if task.report.created_by != request.user:
+            return Response({"detail": "You do not have permission to edit this task."}, status=403)
+
+        
+        new_description = request.data.get("description", None)
+
+        if new_description:
+            task.description = new_description
+
+        
+        task.last_updated_on = datetime.now()
+        task.save()
+
+        
+        response_data = {
+            "id": task.id,
+            "description": task.description,
+            "status": task.status,
+            "last_updated_on": task.last_updated_on.isoformat(),
+        }
+
+        return Response(response_data, status=200)
