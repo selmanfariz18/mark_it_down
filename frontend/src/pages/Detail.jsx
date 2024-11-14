@@ -8,7 +8,7 @@ import "reactjs-popup/dist/index.css";
 
 const Detail = () => {
   const [projectDetails, setProjectDetails] = useState(null);
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [taskName, setTaskName] = useState("");
   const [isEditing, setIsEditing] = useState(null); // To track which task is being edited
   const [editedDescription, setEditedDescription] = useState("");
@@ -58,6 +58,7 @@ const Detail = () => {
     }
 
     try {
+      // Add the task to the backend
       const response = await axios.post(
         `http://localhost:8000/api/projects/${id}/add_task/`,
         { description: taskName },
@@ -69,14 +70,17 @@ const Detail = () => {
       );
 
       if (response.status === 201) {
-        setProjectDetails((prevDetails) => {
-          return {
-            ...prevDetails,
-            tasks: [...prevDetails.tasks, response.data],
-          };
-        });
+        // Update the project details with the newly added task
+        setProjectDetails((prevDetails) => ({
+          ...prevDetails,
+          tasks: [...prevDetails.tasks, response.data],
+        }));
+
+        // Clear the task input field
         setTaskName("");
-        setIsPopupOpen(false);
+
+        // Close the popup by toggling `isOpen`
+        setIsOpen((prev) => !prev); // Toggle state to force a re-render
       }
     } catch (error) {
       toast.error("Failed to add task.");
@@ -230,8 +234,8 @@ const Detail = () => {
 
         <div className="popup_btn bg-white text-center">
           <Popup
-            open={isPopupOpen}
-            onClose={() => setIsPopupOpen(false)}
+            open={isOpen}
+            onClose={() => setIsOpen(false)}
             trigger={<button className="btn">Add</button>}
             position="top"
             contentStyle={{

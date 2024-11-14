@@ -46,6 +46,35 @@ const Dashboard = () => {
     navigate(`/project/${projectId}`);
   };
 
+  const handleDeleteClick = async (event, projectId, projecttitle) => {
+    event.stopPropagation();
+    const token = localStorage.getItem("token");
+    if (
+      window.confirm(
+        "Are you sure? you want to delete " + projecttitle + " project?"
+      )
+    ) {
+      try {
+        const response = await axios.delete(
+          `http://localhost:8000/api/projects/${projectId}/delete/`,
+          {
+            headers: {
+              Authorization: `Token ${token}`,
+            },
+          }
+        );
+        if (response.status === 204) {
+          toast.success("Project deleted successfully!");
+          setProjects((prevProjects) =>
+            prevProjects.filter((project) => project.id !== projectId)
+          );
+        }
+      } catch (error) {
+        toast.error("Failed to delete project");
+      }
+    }
+  };
+
   const handleProjectSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -127,7 +156,17 @@ const Dashboard = () => {
                 className="project-card card mb-2 p-3 col-md-3"
                 onClick={() => handleCardClick(project.id)}
               >
-                <h5 className="bg-white">{project.title}</h5>
+                <div className="d-flex justify-content-between bg-white">
+                  <h5 className="bg-white">{project.title}</h5>
+                  <button
+                    className="bg-white"
+                    onClick={(event) =>
+                      handleDeleteClick(event, project.id, project.title)
+                    }
+                  >
+                    delete
+                  </button>
+                </div>
                 <p className="bg-white">Created on: {project.created_date}</p>
               </div>
             ))
