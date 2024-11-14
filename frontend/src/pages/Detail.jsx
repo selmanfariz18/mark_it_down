@@ -114,7 +114,6 @@ const Detail = () => {
           return { ...prevDetails, tasks: updatedTasks };
         });
       }
-      // window.location.reload();
     } catch (error) {
       toast.error("Failed to update task status.");
     }
@@ -144,7 +143,6 @@ const Detail = () => {
       );
 
       if (response.status === 200) {
-        //window.location.reload();
         toast.success("Task updated successfully!");
         setProjectDetails((prevDetails) => {
           const updatedTasks = prevDetails.tasks.map((task) =>
@@ -164,6 +162,58 @@ const Detail = () => {
     } catch (error) {
       toast.error("Failed to update task.");
     }
+  };
+
+  // Function to generate Markdown content
+  const generateMarkdown = () => {
+    if (!projectDetails) return "";
+
+    const { title, tasks } = projectDetails;
+
+    // Separate the tasks into done and not done
+    const taskListMarkdownDone = tasks
+      .filter((task) => task.status === "done") // Filter only completed tasks
+      .map((task) => {
+        return `- [x] ${task.description} `;
+      })
+      .join("\n\n");
+
+    const taskListMarkdownNotDone = tasks
+      .filter((task) => task.status === "not_done") // Filter only pending tasks
+      .map((task) => {
+        return `- [ ] ${task.description} `;
+      })
+      .join("\n\n");
+
+    return `
+# ${title}
+
+### Summary : ${checkedTasks.length}/${AllTasks.length} Done
+  
+## Pending
+
+${taskListMarkdownNotDone}
+  
+## Completed
+  
+${taskListMarkdownDone}
+    `;
+  };
+
+  // Function to download Markdown file
+  const downloadMarkdown = () => {
+    const markdownContent = generateMarkdown();
+    const blob = new Blob([markdownContent], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+
+    // Create an invisible link and trigger the download
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${projectDetails?.title}-tasks.md`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   if (!projectDetails) {
@@ -189,7 +239,14 @@ const Detail = () => {
       </div>
       <div className="Detail bg-white mx-5 p-3">
         <div className="project_header bg-white">
-          <h3 className="heading bg-white mt-5 mx-5">{projectDetails.title}</h3>
+          <div className="d-flex justify-content-between bg-white">
+            <h3 className="heading bg-white mt-5 mx-5">
+              {projectDetails.title}
+            </h3>
+            <button className="btn" onClick={downloadMarkdown}>
+              Download
+            </button>
+          </div>
           <p className="bg-white mx-5">
             Summary : {checkedTasks.length}/{AllTasks.length} Done
           </p>
