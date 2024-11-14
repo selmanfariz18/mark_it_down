@@ -13,6 +13,7 @@ import { MdEdit } from "react-icons/md";
 import { TiTick } from "react-icons/ti";
 import { TiPlus } from "react-icons/ti";
 import { MdFileUpload } from "react-icons/md";
+import { CgProfile } from "react-icons/cg";
 
 const Detail = () => {
   const [projectDetails, setProjectDetails] = useState(null);
@@ -213,8 +214,6 @@ ${taskListMarkdownDone}
     const markdownContent = generateMarkdown();
     const blob = new Blob([markdownContent], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
-
-    // Create an invisible link and trigger the download
     const link = document.createElement("a");
     link.href = url;
     link.download = `${projectDetails?.title}-tasks.md`;
@@ -222,6 +221,67 @@ ${taskListMarkdownDone}
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  };
+
+  //Upload to gists
+  const uploadToGist = async () => {
+    // Fetch the GitHub token from the backend
+    const token = localStorage.getItem("token");
+
+    try {
+      const response = await axios.get("http://localhost:8000/api/get_pac/", {
+        headers: {
+          Authorization: `Token ${token}`,
+        },
+      });
+
+      const gitPac = response.data.git_pac;
+
+      if (!gitPac || gitPac == "") {
+        toast.error(
+          "GitHub personal access token is not set. Please update your profile."
+        );
+        return;
+      }
+
+      const markdownContent = generateMarkdown();
+      const gistData = {
+        description: `${projectDetails?.title} - Task List`,
+        public: false, // Set to false for a private gist
+        files: {
+          [`${projectDetails?.title}-tasks.md`]: {
+            content: markdownContent,
+          },
+        },
+      };
+
+      // Proceed to upload the gist
+      try {
+        const gistResponse = await axios.post(
+          "https://api.github.com/gists",
+          gistData,
+          {
+            headers: {
+              Authorization: `Bearer ${gitPac}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (gistResponse.status === 201) {
+          toast.success(
+            "Successfully uploaded to GitHub Gists as a private gist!"
+          );
+          window.open(gistResponse.data.html_url, "_blank"); // Open the new gist in a new tab
+        }
+      } catch (error) {
+        toast.error("Failed to upload to GitHub Gists.");
+        console.error(error);
+      }
+    } catch (error) {
+      toast.error("Failed to fetch GitHub personal access token.");
+      console.error(error);
+    }
   };
 
   if (!projectDetails) {
@@ -241,9 +301,14 @@ ${taskListMarkdownDone}
       <ToastContainer />
       <div className="dashboard text-center m-3 mt-3 d-flex justify-content-between">
         <h1>Mark it Down</h1>
-        <button onClick={handleLogout} className="btn">
-          <IoIosLogOut style={{ fontSize: "30px", color: "red" }} />
-        </button>
+        <div className="d-flex">
+          <button onClick={() => navigate("/profile")} className="btn">
+            <CgProfile style={{ fontSize: "30px" }} />
+          </button>
+          <button onClick={handleLogout} className="btn">
+            <IoIosLogOut style={{ fontSize: "30px", color: "red" }} />
+          </button>
+        </div>
       </div>
       <div className="Detail bg-white mx-5 p-3">
         <div className="project_header bg-white">
@@ -255,7 +320,7 @@ ${taskListMarkdownDone}
               <button
                 className="btn"
                 style={{ width: "60px" }}
-                onClick={downloadMarkdown}
+                onClick={uploadToGist}
               >
                 <MdFileUpload
                   style={{

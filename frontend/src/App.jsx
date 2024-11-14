@@ -5,6 +5,7 @@ import Register from "./pages/register";
 import Dashboard from "./pages/Dashboard";
 import Detail from "./pages/Detail";
 import Pagenotfound from "./pages/PageNotFound";
+import Profile from "./pages/Profile";
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -31,6 +32,14 @@ function App() {
           element={
             <PrivateRoute>
               <Detail />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <PrivateRoute>
+              <Profile />
             </PrivateRoute>
           }
         />

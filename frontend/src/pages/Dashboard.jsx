@@ -10,6 +10,7 @@ import "reactjs-popup/dist/index.css";
 import { IoIosLogOut } from "react-icons/io";
 import { TiPlus } from "react-icons/ti";
 import { MdDelete } from "react-icons/md";
+import { CgProfile } from "react-icons/cg";
 
 const Dashboard = () => {
   const [projectName, setProjectName] = useState("");
@@ -119,9 +120,14 @@ const Dashboard = () => {
       <ToastContainer />
       <div className="dashboard text-center m-3 mt-3 d-flex justify-content-between">
         <h1>Mark it Down</h1>
-        <button onClick={handleLogout} className="btn">
-          <IoIosLogOut style={{ fontSize: "30px", color: "red" }} />
-        </button>
+        <div className="d-flex">
+          <button onClick={() => navigate("/profile")} className="btn">
+            <CgProfile style={{ fontSize: "30px" }} />
+          </button>
+          <button onClick={handleLogout} className="btn">
+            <IoIosLogOut style={{ fontSize: "30px", color: "red" }} />
+          </button>
+        </div>
       </div>
 
       <div className="projects bg-white mx-5 p-3">
