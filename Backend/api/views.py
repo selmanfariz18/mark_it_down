@@ -10,7 +10,7 @@ from django.core.exceptions import ValidationError
 from django.core.exceptions import MultipleObjectsReturned
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
-from api.models import Project, Task
+from api.models import Project, Task, Profile
 from django.shortcuts import get_object_or_404
 
 # Create your views here.
@@ -323,3 +323,60 @@ class UpdateTaskDescriptionView(APIView):
         }
 
         return Response(response_data, status=200)
+    
+class get_pac(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    def get(self,request):
+        user = request.user
+        
+        try:
+            # Get the profile associated with the user
+            profile = Profile.objects.get(user=user)
+            git_pac = profile.git_pac if profile.git_pac else ""
+        except Profile.DoesNotExist:
+            git_pac = ""
+            
+        return Response({'git_pac': git_pac})
+    
+    
+# ===========Profile==================    
+    
+class UserProfileView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        try:
+            # Get the profile associated with the user
+            profile = Profile.objects.get(user=user)
+            git_pac = profile.git_pac if profile.git_pac else ""
+        except Profile.DoesNotExist:
+            git_pac = ""
+
+        return Response({
+            "username": user.username,
+            "git_pac": git_pac
+        }, status=200)
+        
+    def put(self, request):
+        """Handle PUT request to update git_pac."""
+        user = request.user
+        git_pac = request.data.get("git_pac", "").strip()
+        
+        # Validate the input
+        if git_pac is None:
+            return Response({"error": "Git PAC value is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Fetch or create the profile for the user
+            profile, created = Profile.objects.get_or_create(user=user)
+            profile.git_pac = git_pac
+            profile.save()
+            return Response({
+                "message": "Git PAC updated successfully",
+                "git_pac": profile.git_pac
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": f"Failed to update Git PAC: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

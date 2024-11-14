@@ -21,3 +21,7 @@ class Task(models.Model):
 
     def __str__(self):
         return self.description
+    
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    git_pac = models.CharField(max_length=255, blank=True, null=True)
