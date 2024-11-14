@@ -170,6 +170,25 @@ class ProjectListView(APIView):
         
         return Response(project_list, status=status.HTTP_200_OK)
     
+class ProjectDeleteView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [AllowAny]
+
+    def delete(self, request, project_id):
+        user = request.user
+        if not user.is_authenticated:
+            return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Get the project by ID
+        project = get_object_or_404(Project, id=project_id, created_by=user)
+        
+        # Delete the project
+        project.delete()
+        
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+# ================Detail page view================
+    
 class ProjectDetailView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [AllowAny]    
