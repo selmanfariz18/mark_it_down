@@ -6,6 +6,11 @@ import axios from "axios";
 import Popup from "reactjs-popup";
 import "reactjs-popup/dist/index.css";
 
+// logos
+import { IoIosLogOut } from "react-icons/io";
+import { TiPlus } from "react-icons/ti";
+import { MdDelete } from "react-icons/md";
+
 const Dashboard = () => {
   const [projectName, setProjectName] = useState("");
   const [error, setError] = useState("");
@@ -114,8 +119,8 @@ const Dashboard = () => {
       <ToastContainer />
       <div className="dashboard text-center m-3 mt-3 d-flex justify-content-between">
         <h1>Mark it Down</h1>
-        <button onClick={handleLogout} className="btn btn-danger">
-          Logout
+        <button onClick={handleLogout} className="btn">
+          <IoIosLogOut style={{ fontSize: "30px", color: "red" }} />
         </button>
       </div>
 
@@ -126,7 +131,13 @@ const Dashboard = () => {
             ref={popupRef}
             open={isPopupOpen}
             onClose={() => setIsPopupOpen(false)}
-            trigger={<button className="btn">Add</button>}
+            trigger={
+              <button className="btn">
+                <TiPlus
+                  style={{ fontSize: "50px", backgroundColor: "white" }}
+                />
+              </button>
+            }
             position="left"
             contentStyle={{
               width: "300px",
@@ -163,12 +174,14 @@ const Dashboard = () => {
                 <div className="d-flex justify-content-between bg-white">
                   <h5 className="bg-white">{project.title}</h5>
                   <button
-                    className="bg-white"
+                    className="btn bg-white"
                     onClick={(event) =>
                       handleDeleteClick(event, project.id, project.title)
                     }
                   >
-                    delete
+                    <MdDelete
+                      style={{ fontSize: "20px", backgroundColor: "white" }}
+                    />
                   </button>
                 </div>
                 <p className="bg-white">Created on: {project.created_date}</p>

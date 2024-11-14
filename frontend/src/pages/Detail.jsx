@@ -6,6 +6,14 @@ import axios from "axios";
 import Popup from "reactjs-popup";
 import "reactjs-popup/dist/index.css";
 
+// icons
+import { IoIosLogOut } from "react-icons/io";
+import { IoMdDownload } from "react-icons/io";
+import { MdEdit } from "react-icons/md";
+import { TiTick } from "react-icons/ti";
+import { TiPlus } from "react-icons/ti";
+import { MdFileUpload } from "react-icons/md";
+
 const Detail = () => {
   const [projectDetails, setProjectDetails] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -233,8 +241,8 @@ ${taskListMarkdownDone}
       <ToastContainer />
       <div className="dashboard text-center m-3 mt-3 d-flex justify-content-between">
         <h1>Mark it Down</h1>
-        <button onClick={handleLogout} className="btn btn-danger">
-          Logout
+        <button onClick={handleLogout} className="btn">
+          <IoIosLogOut style={{ fontSize: "30px", color: "red" }} />
         </button>
       </div>
       <div className="Detail bg-white mx-5 p-3">
@@ -243,9 +251,53 @@ ${taskListMarkdownDone}
             <h3 className="heading bg-white mt-5 mx-5">
               {projectDetails.title}
             </h3>
-            <button className="btn" onClick={downloadMarkdown}>
-              Download
-            </button>
+            <div className="d-flex bg-white">
+              <button
+                className="btn"
+                style={{ width: "60px" }}
+                onClick={downloadMarkdown}
+              >
+                <MdFileUpload
+                  style={{
+                    fontSize: "30px",
+                    marginTop: "15px",
+                    backgroundColor: "white",
+                    marginLeft: "-22px",
+                  }}
+                />{" "}
+                <p
+                  className="bg-white d-flex"
+                  style={{
+                    fontSize: "10px",
+                    width: "10px",
+                    justifyContent: "center",
+                    textAlign: "center",
+                  }}
+                >
+                  Upload to gists
+                </p>
+              </button>
+              <button className="btn" onClick={downloadMarkdown}>
+                <IoMdDownload
+                  style={{
+                    fontSize: "30px",
+                    backgroundColor: "white",
+                    marginLeft: "-10px",
+                  }}
+                />
+                <p
+                  className="bg-white d-flex"
+                  style={{
+                    fontSize: "10px",
+                    width: "10px",
+                    justifyContent: "center",
+                    textAlign: "center",
+                  }}
+                >
+                  Download as .md
+                </p>
+              </button>
+            </div>
           </div>
           <p className="bg-white mx-5">
             Summary : {checkedTasks.length}/{AllTasks.length} Done
@@ -269,10 +321,12 @@ ${taskListMarkdownDone}
                     className="mt-3 mx-2 bg-white form-control"
                   />
                   <button
-                    className="btn btn-success mt-3"
+                    className="btn btn-white mt-2"
                     onClick={() => handleSaveTask(task.id)}
                   >
-                    Done
+                    <TiTick
+                      style={{ fontSize: "30px", backgroundColor: "white" }}
+                    />
                   </button>
                 </>
               ) : (
@@ -283,10 +337,12 @@ ${taskListMarkdownDone}
                     {new Date(task.last_updated_on).toLocaleString()}
                   </p>
                   <button
-                    className="btn btn-warning mt-3"
+                    className="btn btn-white"
                     onClick={() => handleEditTask(task.id, task.description)}
                   >
-                    Edit
+                    <MdEdit
+                      style={{ fontSize: "20px", backgroundColor: "white" }}
+                    />
                   </button>
                 </>
               )}
@@ -299,7 +355,14 @@ ${taskListMarkdownDone}
             ref={popupRef}
             open={isOpen}
             //onClose={() => setIsOpen(false)}
-            trigger={<button className="btn">Add</button>}
+            trigger={
+              <button className="btn">
+                {" "}
+                <TiPlus
+                  style={{ fontSize: "30px", backgroundColor: "white" }}
+                />
+              </button>
+            }
             position="top"
             contentStyle={{
               width: "300px",
