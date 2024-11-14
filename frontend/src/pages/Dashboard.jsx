@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -12,6 +12,7 @@ const Dashboard = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [projects, setProjects] = useState([]);
   const navigate = useNavigate();
+  const popupRef = useRef();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -96,7 +97,9 @@ const Dashboard = () => {
         setProjectName("");
         toast.success("Project Created Successfully!");
         fetchProjects(token);
-        setIsPopupOpen(false);
+        if (popupRef.current) {
+          popupRef.current.close();
+        }
       }
     } catch (error) {
       const errorMsg =
@@ -120,6 +123,7 @@ const Dashboard = () => {
         <div className="project_header d-flex justify-content-between bg-white">
           <h3 className="heading bg-white">Projects</h3>
           <Popup
+            ref={popupRef}
             open={isPopupOpen}
             onClose={() => setIsPopupOpen(false)}
             trigger={<button className="btn">Add</button>}

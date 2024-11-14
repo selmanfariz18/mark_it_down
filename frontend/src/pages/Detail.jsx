@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -14,6 +14,7 @@ const Detail = () => {
   const [editedDescription, setEditedDescription] = useState("");
   const { id } = useParams();
   const navigate = useNavigate();
+  const popupRef = useRef();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -79,8 +80,12 @@ const Detail = () => {
         // Clear the task input field
         setTaskName("");
 
-        // Close the popup by toggling `isOpen`
-        setIsOpen((prev) => !prev); // Toggle state to force a re-render
+        // Close the popup using the reference
+        if (popupRef.current) {
+          popupRef.current.close();
+        }
+
+        // toast.success("Task added successfully!");
       }
     } catch (error) {
       toast.error("Failed to add task.");
@@ -234,8 +239,9 @@ const Detail = () => {
 
         <div className="popup_btn bg-white text-center">
           <Popup
+            ref={popupRef}
             open={isOpen}
-            onClose={() => setIsOpen(false)}
+            //onClose={() => setIsOpen(false)}
             trigger={<button className="btn">Add</button>}
             position="top"
             contentStyle={{
