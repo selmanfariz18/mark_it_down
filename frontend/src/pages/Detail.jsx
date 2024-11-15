@@ -14,6 +14,8 @@ import { TiTick } from "react-icons/ti";
 import { TiPlus } from "react-icons/ti";
 import { MdFileUpload } from "react-icons/md";
 import { CgProfile } from "react-icons/cg";
+import { ImCross } from "react-icons/im";
+import { MdDelete } from "react-icons/md";
 
 const Detail = () => {
   const [projectDetails, setProjectDetails] = useState(null);
@@ -21,6 +23,8 @@ const Detail = () => {
   const [taskName, setTaskName] = useState("");
   const [isEditing, setIsEditing] = useState(null); // To track which task is being edited
   const [editedDescription, setEditedDescription] = useState("");
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editedTitle, setEditedTitle] = useState("");
   const { id } = useParams();
   const navigate = useNavigate();
   const popupRef = useRef();
@@ -56,6 +60,41 @@ const Detail = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/login");
+  };
+
+  const handleEditTitle = () => {
+    setIsEditingTitle(true);
+  };
+
+  const handleSaveTitle = async () => {
+    const token = localStorage.getItem("token");
+    if (!editedTitle) {
+      toast.error("Project title cannot be empty.");
+      return;
+    }
+
+    try {
+      const response = await axios.patch(
+        `http://localhost:8000/api/projects/${id}/update_title/`,
+        { title: editedTitle },
+        {
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        setProjectDetails((prevDetails) => ({
+          ...prevDetails,
+          title: editedTitle,
+        }));
+        setIsEditingTitle(false);
+        toast.success("Project title updated successfully!");
+      }
+    } catch (error) {
+      toast.error("Failed to update project title.");
+    }
   };
 
   const handleAddTask = async (e) => {
@@ -131,6 +170,31 @@ const Detail = () => {
   const handleEditTask = (taskId, currentDescription) => {
     setIsEditing(taskId);
     setEditedDescription(currentDescription);
+  };
+
+  const handleDeleteTask = async (taskId) => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await axios.delete(
+        `http://localhost:8000/api/tasks/${taskId}/delete/`,
+        {
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 204) {
+        // Remove the deleted task from the project details state
+        setProjectDetails((prevDetails) => ({
+          ...prevDetails,
+          tasks: prevDetails.tasks.filter((task) => task.id !== taskId),
+        }));
+        toast.success("Task deleted successfully!");
+      }
+    } catch (error) {
+      toast.error("Failed to delete task.");
+    }
   };
 
   const handleSaveTask = async (taskId) => {
@@ -313,9 +377,71 @@ ${taskListMarkdownDone}
       <div className="Detail bg-white mx-5 p-3">
         <div className="project_header bg-white">
           <div className="d-flex justify-content-between bg-white">
-            <h3 className="heading bg-white mt-5 mx-5">
-              {projectDetails.title}
-            </h3>
+            {isEditingTitle ? (
+              <div
+                className="d-flex bg-white title_edit"
+                style={{
+                  height: "35px",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginTop: "auto",
+                  marginBottom: "auto",
+                }}
+              >
+                {/* Input field with current title pre-filled */}
+                <input
+                  type="text"
+                  value={editedTitle}
+                  onChange={(e) => setEditedTitle(e.target.value)}
+                  className="form-control"
+                  placeholder="Edit project title"
+                />
+                <button onClick={handleSaveTitle} className="btn mx-2 bg-white">
+                  <TiTick
+                    style={{
+                      fontSize: "30px",
+                      backgroundColor: "white",
+                      color: "green",
+                    }}
+                  />
+                </button>
+                {/* Cancel editing */}
+                <button
+                  className="btn"
+                  onClick={() => {
+                    setIsEditingTitle(false);
+                    setEditedTitle(projectDetails.title); // Reset title if canceled
+                  }}
+                >
+                  <ImCross
+                    style={{
+                      fontSize: "15px",
+                      color: "red",
+                      backgroundColor: "white",
+                    }}
+                  />
+                </button>
+              </div>
+            ) : (
+              <div className="d-flex align-items-center bg-white mx-5">
+                <h3 className="bg-white">{projectDetails.title}</h3>
+                <button
+                  onClick={() => {
+                    setIsEditingTitle(true);
+                    setEditedTitle(projectDetails.title);
+                  }}
+                  className="btn"
+                >
+                  <MdEdit
+                    style={{
+                      fontSize: "15px",
+                      color: "black",
+                      backgroundColor: "white",
+                    }}
+                  />
+                </button>
+              </div>
+            )}
             <div className="d-flex bg-white">
               <button
                 className="btn"
@@ -390,7 +516,11 @@ ${taskListMarkdownDone}
                     onClick={() => handleSaveTask(task.id)}
                   >
                     <TiTick
-                      style={{ fontSize: "30px", backgroundColor: "white" }}
+                      style={{
+                        fontSize: "30px",
+                        backgroundColor: "white",
+                        color: "green",
+                      }}
                     />
                   </button>
                 </>
@@ -406,7 +536,7 @@ ${taskListMarkdownDone}
                     onClick={() => handleEditTask(task.id, task.description)}
                   >
                     <MdEdit
-                      style={{ fontSize: "20px", backgroundColor: "white" }}
+                      style={{ fontSize: "15px", backgroundColor: "white" }}
                     />
                   </button>
                 </>
@@ -468,6 +598,15 @@ ${taskListMarkdownDone}
               <p className="mt-3 mx-2 bg-white text-muted">
                 Last Updated: {new Date(task.last_updated_on).toLocaleString()}
               </p>
+              {/* Delete button */}
+              <button
+                className="btn btn-sm"
+                onClick={() => handleDeleteTask(task.id)}
+              >
+                <MdDelete
+                  style={{ fontSize: "15px", backgroundColor: "white" }}
+                />
+              </button>
             </div>
           ))}
         </div>

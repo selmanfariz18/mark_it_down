@@ -105,3 +105,11 @@
 .add_button{
   margin-left: 80px;
 }
+
+.title_edit{
+  height: 35px;
+  justify-content: center;
+  align-items: center;
+  margin-top: auto;
+  margin-bottom: auto;
+}
