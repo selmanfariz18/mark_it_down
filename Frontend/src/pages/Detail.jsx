@@ -252,7 +252,7 @@ const Detail = () => {
     return `
 # ${title}
 
-### Summary : ${checkedTasks.length}/${AllTasks.length} Done
+### Summary : ${checkedTasks.length}/${AllTasks.length} Compleated
   
 ## Pending
 
