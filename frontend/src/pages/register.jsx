@@ -5,17 +5,33 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const Register = () => {
-  const [Name, setName] = useState("");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [Confirmpassword, setConfirmPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
+
+  // Password validation function
+  const validatePassword = (password) => {
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return passwordRegex.test(password);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (password !== Confirmpassword) {
-      setError("Passwords do not match");
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    // Validate password strength
+    if (!validatePassword(password)) {
+      toast.error(
+        "Password must be at least 8 characters long, include uppercase, lowercase, a number, and a special character."
+      );
       return;
     }
 
@@ -23,10 +39,10 @@ const Register = () => {
       const response = await axios.post(
         "http://localhost:8000/api/signup/",
         {
-          first_name: Name,
+          first_name: name,
           email: email,
           password: password,
-          confirm_password: Confirmpassword,
+          confirm_password: confirmPassword,
         },
         {
           headers: {
@@ -52,13 +68,14 @@ const Register = () => {
   return (
     <>
       <ToastContainer />
-      <div className="register">
-        <h1>Register</h1>
-        <form onSubmit={handleSubmit}>
+      <div className="register card bg-white">
+        <h1 className="bg-white mb-3">Mark It Down</h1>
+        <h4 className="bg-white">Register</h4>
+        <form onSubmit={handleSubmit} className="bg-white text-center">
           <div className="mb-3">
             <input
               type="text"
-              value={Name}
+              value={name}
               onChange={(e) => setName(e.target.value)}
               className="form-control"
               placeholder="Name"
@@ -88,7 +105,7 @@ const Register = () => {
           <div className="mb-3">
             <input
               type="password"
-              value={Confirmpassword}
+              value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="form-control"
               placeholder="Confirm Password"
@@ -97,11 +114,9 @@ const Register = () => {
           </div>
           <div className="mb-3">
             <button
-              type="submit"
-              className="btn btn-link"
-              onClick={() => {
-                navigate("/login");
-              }}
+              type="button"
+              className="btn btn-link bg-white"
+              onClick={() => navigate("/login")}
             >
               Already registered? Login here
             </button>
