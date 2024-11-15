@@ -190,7 +190,9 @@ const Dashboard = () => {
                     />
                   </button>
                 </div>
-                <p className="bg-white">Created on: {project.created_date}</p>
+                <p className="bg-white">
+                  Created on: {new Date(project.created_date).toLocaleString()}
+                </p>
               </div>
             ))
           ) : (

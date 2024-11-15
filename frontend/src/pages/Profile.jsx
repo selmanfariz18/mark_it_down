@@ -3,8 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
+
+// icons
 import { IoIosLogOut } from "react-icons/io";
 import { RxAvatar } from "react-icons/rx";
+import { MdEdit } from "react-icons/md";
+import { TiTick } from "react-icons/ti";
 
 const Profile = () => {
   const [username, setUsername] = useState("");
@@ -56,11 +60,11 @@ const Profile = () => {
         }
       );
       if (response.status === 200) {
-        toast.success("Git PAC updated successfully!");
+        toast.success("GitHub PAC updated successfully!");
         setIsEditing(false);
       }
     } catch (error) {
-      toast.error("Failed to update Git PAC");
+      toast.error("Failed to update GitHub PAC");
     }
   };
 
@@ -78,31 +82,88 @@ const Profile = () => {
           <RxAvatar style={{ fontSize: "150px", background: "white" }} />
         </div>
         <h3 className="profile_name text-center bg-white">{username}</h3>
-        <div className="text-center bg-white">
-          <label htmlFor="gitPac" className="d-block bg-white">
-            Git PAC:
-          </label>
-          <input
-            id="gitPac"
-            type="password"
-            value={gitPac}
-            onChange={(e) => setGitPac(e.target.value)}
-            readOnly={!isEditing}
-            className="form-control mx-auto"
-            style={{ width: "300px" }}
-          />
-          {isEditing ? (
-            <button className="btn btn-success mt-3" onClick={handleSaveGitPac}>
-              Save
-            </button>
-          ) : (
-            <button
-              className="btn btn-primary mt-3"
-              onClick={() => setIsEditing(true)}
-            >
-              Edit
-            </button>
-          )}
+
+        <div className="bg-white mx-3 my-5 row">
+          {/* Left Column - GitHub PAC Input */}
+          <div className="col-md-6 d-flex align-items-center bg-white">
+            <label htmlFor="gitPac" className="d-block bg-white">
+              GitHub PAC:
+            </label>
+            <input
+              id="gitPac"
+              type="password"
+              value={gitPac}
+              onChange={(e) => setGitPac(e.target.value)}
+              readOnly={!isEditing}
+              className="form-control mx-3"
+              style={{ width: "300px", height: "30px" }}
+            />
+            {isEditing ? (
+              <button className="btn" onClick={handleSaveGitPac}>
+                <TiTick
+                  style={{
+                    fontSize: "30px",
+                    backgroundColor: "white",
+                    color: "green",
+                  }}
+                />
+              </button>
+            ) : (
+              <button className="btn" onClick={() => setIsEditing(true)}>
+                <MdEdit
+                  style={{
+                    fontSize: "20px",
+                    color: "black",
+                    backgroundColor: "white",
+                  }}
+                />
+              </button>
+            )}
+          </div>
+
+          {/* Right Column - Instructions */}
+          <div className="col-md-6 bg-white">
+            <h5 className="bg-white">
+              How to Generate a GitHub PAC for Gists:
+            </h5>
+            <ol className="bg-white">
+              <li className="bg-white">
+                Go to your GitHub account and navigate to{" "}
+                <a
+                  className="bg-white"
+                  href="https://github.com/settings/tokens"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Personal Access Tokens
+                </a>
+                .
+              </li>
+              <li className="bg-white">
+                Click on{" "}
+                <strong className="bg-white">Generate new token</strong>.
+              </li>
+              <li className="bg-white">
+                Set a name/description for the token.
+              </li>
+              <li className="bg-white">
+                Under <strong className="bg-white">Repository Access</strong>,
+                select the scopes:
+                <ul className="bg-white">
+                  <li className="bg-white">
+                    <code>gist</code> - for creating and managing gists.
+                  </li>
+                </ul>
+              </li>
+              <li className="bg-white">
+                Click <strong className="bg-white">Generate token</strong>.
+              </li>
+              <li className="bg-white">
+                Copy the generated token and paste it into the "GitHub PAC"
+                field on this page.
+              </li>
+            </ol>
+          </div>
         </div>
       </div>
     </>
