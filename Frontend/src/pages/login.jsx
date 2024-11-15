@@ -9,18 +9,15 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  // Regular expression to validate strong password
   const validatePassword = (password) => {
     const passwordRegex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return passwordRegex.test(password);
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Check if password is strong
     if (!validatePassword(password)) {
       toast.error(
         "Password must be at least 8 characters long, include uppercase, lowercase, a number, and a special character."
@@ -34,12 +31,10 @@ const Login = () => {
         password,
       });
 
-      // Save the token to local storage
       localStorage.setItem("token", response.data.token);
 
       toast.success("Login Successful!");
 
-      // Redirect to dashboard after a delay
       setTimeout(() => {
         navigate("/dashboard");
       }, 2000);

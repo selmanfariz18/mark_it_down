@@ -21,7 +21,7 @@ const Detail = () => {
   const [projectDetails, setProjectDetails] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
   const [taskName, setTaskName] = useState("");
-  const [isEditing, setIsEditing] = useState(null); // To track which task is being edited
+  const [isEditing, setIsEditing] = useState(null);
   const [editedDescription, setEditedDescription] = useState("");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState("");
@@ -107,7 +107,6 @@ const Detail = () => {
     }
 
     try {
-      // Add the task to the backend
       const response = await axios.post(
         `http://localhost:8000/api/projects/${id}/add_task/`,
         { description: taskName },
@@ -119,21 +118,16 @@ const Detail = () => {
       );
 
       if (response.status === 201) {
-        // Update the project details with the newly added task
         setProjectDetails((prevDetails) => ({
           ...prevDetails,
           tasks: [...prevDetails.tasks, response.data],
         }));
 
-        // Clear the task input field
         setTaskName("");
 
-        // Close the popup using the reference
         if (popupRef.current) {
           popupRef.current.close();
         }
-
-        // toast.success("Task added successfully!");
       }
     } catch (error) {
       toast.error("Failed to add task.");
@@ -185,7 +179,6 @@ const Detail = () => {
       );
 
       if (response.status === 204) {
-        // Remove the deleted task from the project details state
         setProjectDetails((prevDetails) => ({
           ...prevDetails,
           tasks: prevDetails.tasks.filter((task) => task.id !== taskId),
@@ -237,22 +230,20 @@ const Detail = () => {
     }
   };
 
-  // Function to generate Markdown content
   const generateMarkdown = () => {
     if (!projectDetails) return "";
 
     const { title, tasks } = projectDetails;
 
-    // Separate the tasks into done and not done
     const taskListMarkdownDone = tasks
-      .filter((task) => task.status === "done") // Filter only completed tasks
+      .filter((task) => task.status === "done")
       .map((task) => {
         return `- [x] ${task.description} `;
       })
       .join("\n\n");
 
     const taskListMarkdownNotDone = tasks
-      .filter((task) => task.status === "not_done") // Filter only pending tasks
+      .filter((task) => task.status === "not_done")
       .map((task) => {
         return `- [ ] ${task.description} `;
       })
@@ -388,7 +379,6 @@ ${taskListMarkdownDone}
                   marginBottom: "auto",
                 }}
               >
-                {/* Input field with current title pre-filled */}
                 <input
                   type="text"
                   value={editedTitle}
@@ -405,12 +395,11 @@ ${taskListMarkdownDone}
                     }}
                   />
                 </button>
-                {/* Cancel editing */}
                 <button
                   className="btn"
                   onClick={() => {
                     setIsEditingTitle(false);
-                    setEditedTitle(projectDetails.title); // Reset title if canceled
+                    setEditedTitle(projectDetails.title);
                   }}
                 >
                   <ImCross

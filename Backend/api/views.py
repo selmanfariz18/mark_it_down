@@ -17,20 +17,17 @@ from django.shortcuts import get_object_or_404
 
 
 class Signup(APIView):
-    authentication_classes = []  # No authentication required
-    permission_classes = [AllowAny]  # Allow any user to access this view
+    authentication_classes = []  
+    permission_classes = [AllowAny]  
 
     def post(self, request):
         data = request.data
 
-        # Extract fields from the request
         first_name = data.get('first_name')
         email = data.get('email')
         password = data.get('password')
         confirm_password = data.get('confirm_password')
 
-
-        # Validate required fields
         required_fields = ['first_name', 'password', 'confirm_password']
         missing_fields = [field for field in required_fields if not data.get(field)]
         if missing_fields:
@@ -38,12 +35,10 @@ class Signup(APIView):
                 {'error': f"Missing fields: {', '.join(missing_fields)}"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-
-        # Validate if passwords match
+            
         if password != confirm_password:
             return Response({'error': 'Passwords do not match'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check if user with the same phone number already exists
         if User.objects.filter(email=email).exists():
             return Response({'error': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -65,13 +60,13 @@ class Signup(APIView):
         except Exception as e:
             return Response({'error': f'Error creating user: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        # Optionally, you can return additional data such as user ID or token
+        
         return Response({'message': 'Account created successfully'}, status=status.HTTP_201_CREATED)
         
             
 class SignInView(APIView):
-    authentication_classes = []  # No authentication required
-    permission_classes = [AllowAny]  # Allow any user to access this view
+    authentication_classes = []  
+    permission_classes = [AllowAny]  
 
     def post(self, request):
         email = request.data.get('email')
@@ -80,21 +75,18 @@ class SignInView(APIView):
         if not email or not password:
             return Response({'message': 'Please provide both phone number and password.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check if the UserProfile exists for the given phone_number
         user_profile = User.objects.filter(email=email).first()
         if user_profile is None:
             return Response({'message': 'Email not found.'}, status=status.HTTP_404_NOT_FOUND)
 
         try:
-            user = user_profile  # Get the associated User
+            user = user_profile  
 
-            # Authenticate the user
             if user.check_password(password):
-                # Generate token or get an existing token
                 token, created = Token.objects.get_or_create(user=user)
 
                 return Response({
-                    'token': token.key,  # Return the token in the response
+                    'token': token.key, 
                     'message': 'Login successful!'
                 }, status=status.HTTP_200_OK)
             else:
@@ -104,11 +96,10 @@ class SignInView(APIView):
             return Response({'message': 'An error occurred: ' + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 class TokenValidationView(APIView):
-    authentication_classes = [TokenAuthentication]  # Require token authentication
-    permission_classes = [IsAuthenticated]  # Ensure the user is authenticated
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]  
 
     def get(self, request):
-        # If the request reaches this point, the token is valid
         return Response({'message': 'Token is valid.'}, status=status.HTTP_200_OK)
     
     
@@ -138,7 +129,6 @@ class CreateProject(APIView):
             created_date=datetime.now()
         )
         
-        # Return a simple response with project details
         return Response({
             "id": project.id,
             "title": project.title,
@@ -155,10 +145,9 @@ class ProjectListView(APIView):
         if not user.is_authenticated:
             return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
         
-        # Fetch all projects created by the logged-in user
+        
         projects = Project.objects.filter(created_by=user)
 
-        # Manually create a list of project dictionaries
         project_list = [
             {
                 "id": project.id,
@@ -179,10 +168,10 @@ class ProjectDeleteView(APIView):
         if not user.is_authenticated:
             return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        # Get the project by ID
+        
         project = get_object_or_404(Project, id=project_id, created_by=user)
         
-        # Delete the project
+        
         project.delete()
         
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -194,18 +183,14 @@ class ProjectDetailView(APIView):
     permission_classes = [AllowAny]    
     
     def get(self, request, project_id):
-        # Ensure the user is authenticated
         user = request.user
         if not user.is_authenticated:
             return Response({"error": "Authentication required"}, status=401)
         
-        # Get the project by ID, or return 404 if not found
         project = get_object_or_404(Project, id=project_id, created_by=user)
 
-        # Get related tasks for this project
         tasks = Task.objects.filter(report = project)
 
-        # Prepare the tasks data
         task_data = []
         for task in tasks:
             task_data.append({
@@ -216,7 +201,6 @@ class ProjectDetailView(APIView):
                 "last_updated_on": task.last_updated_on
             })
 
-        # Prepare the response data
         response_data = {
             "id": project.id,
             "title": project.title,
@@ -224,32 +208,29 @@ class ProjectDetailView(APIView):
             "tasks": task_data
         }
 
-        # Return the project details and tasks as JSON
         return Response(response_data, status=200)
     
 class AddTaskView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [AllowAny]
     def post(self, request, project_id):
-        # Ensure the user is authenticated
+        
         user = request.user
         if not user.is_authenticated:
             return Response({"error": "Authentication required"}, status=401)
 
-        # Fetch the project to which we will add the task
         project = get_object_or_404(Project, id=project_id, created_by=user)
 
-        # Get the task description from the request body
         task_description = request.data.get("description")
 
         if not task_description:
             return Response({"error": "Task description is required"}, status=400)
 
-        # Create the new task
+      
         task = Task.objects.create(
             report=project,
             description=task_description,
-            status="not_done",  # The task is initially unchecked
+            status="not_done",  
             created_date=datetime.now(),  
             last_updated_on=datetime.now(),  
         )
@@ -273,12 +254,10 @@ class UpdateTaskStatusView(APIView):
 
         task = get_object_or_404(Task, id=task_id)
 
-        # Only the creator of the task can change its status
         if task.report.created_by != user:
             return Response({"error": "Permission denied"}, status=403)
 
-        # Set the current datetime
-        task.last_updated_on = datetime.now()  # Use datetime for both date and time
+        task.last_updated_on = datetime.now() 
         task.status = 'done' if task.status == 'not_done' else 'not_done'
         task.save()
 
@@ -286,7 +265,7 @@ class UpdateTaskStatusView(APIView):
             "id": task.id,
             "description": task.description,
             "status": task.status,
-            "last_updated_on": task.last_updated_on,  # Include last_updated_on in response
+            "last_updated_on": task.last_updated_on,  
         })
         
 class UpdateTaskDescriptionView(APIView):
@@ -331,7 +310,7 @@ class get_pac(APIView):
         user = request.user
         
         try:
-            # Get the profile associated with the user
+            
             profile = Profile.objects.get(user=user)
             git_pac = profile.git_pac if profile.git_pac else ""
         except Profile.DoesNotExist:
@@ -346,28 +325,23 @@ class UpdateProjectTitleView(APIView):
 
     def patch(self, request, project_id):
         try:
-            # Fetch the project by its ID
+            
             project = Project.objects.get(id=project_id)
         except Project.DoesNotExist:
             return Response({"detail": "Project not found."}, status=404)
 
-        # Check if the user has permission to update this project
         if project.created_by != request.user:
             return Response({"detail": "You do not have permission to edit this project."}, status=403)
 
-        # Get the new title from the request
         new_title = request.data.get("title", None)
 
-        # Validate the new title
         if not new_title:
             return Response({"detail": "Title cannot be empty."}, status=400)
 
-        # Update the project's title and save
         project.title = new_title
         project.last_updated_on = datetime.now()
         project.save()
 
-        # Return the updated project details
         response_data = {
             "id": project.id,
             "title": project.title,
@@ -386,7 +360,6 @@ class DeleteTaskView(APIView):
         except Task.DoesNotExist:
             return Response({"detail": "Task not found."}, status=404)
 
-        # Check if the user is the owner of the task's project
         if task.report.created_by != request.user:
             return Response({"detail": "You do not have permission to delete this task."}, status=403)
 
@@ -403,7 +376,7 @@ class UserProfileView(APIView):
     def get(self, request):
         user = request.user
         try:
-            # Get the profile associated with the user
+            
             profile = Profile.objects.get(user=user)
             git_pac = profile.git_pac if profile.git_pac else ""
         except Profile.DoesNotExist:
@@ -419,12 +392,10 @@ class UserProfileView(APIView):
         user = request.user
         git_pac = request.data.get("git_pac", "").strip()
         
-        # Validate the input
         if git_pac is None:
             return Response({"error": "Git PAC value is required"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            # Fetch or create the profile for the user
             profile, created = Profile.objects.get_or_create(user=user)
             profile.git_pac = git_pac
             profile.save()
