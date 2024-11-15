@@ -339,6 +339,60 @@ class get_pac(APIView):
             
         return Response({'git_pac': git_pac})
     
+
+class UpdateProjectTitleView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, project_id):
+        try:
+            # Fetch the project by its ID
+            project = Project.objects.get(id=project_id)
+        except Project.DoesNotExist:
+            return Response({"detail": "Project not found."}, status=404)
+
+        # Check if the user has permission to update this project
+        if project.created_by != request.user:
+            return Response({"detail": "You do not have permission to edit this project."}, status=403)
+
+        # Get the new title from the request
+        new_title = request.data.get("title", None)
+
+        # Validate the new title
+        if not new_title:
+            return Response({"detail": "Title cannot be empty."}, status=400)
+
+        # Update the project's title and save
+        project.title = new_title
+        project.last_updated_on = datetime.now()
+        project.save()
+
+        # Return the updated project details
+        response_data = {
+            "id": project.id,
+            "title": project.title,
+            "last_updated_on": project.last_updated_on.isoformat(),
+        }
+
+        return Response(response_data, status=200)
+    
+class DeleteTaskView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, task_id):
+        try:
+            task = Task.objects.get(id=task_id)
+        except Task.DoesNotExist:
+            return Response({"detail": "Task not found."}, status=404)
+
+        # Check if the user is the owner of the task's project
+        if task.report.created_by != request.user:
+            return Response({"detail": "You do not have permission to delete this task."}, status=403)
+
+        task.delete()
+        return Response({"detail": "Task deleted successfully."}, status=204)
+    
     
 # ===========Profile==================    
     
