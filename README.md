@@ -32,7 +32,14 @@ Then install the dependencies:
 Note the `(venv)` in front of the prompt. This indicates that this terminal
 session operates in a virtual environment set up by python venv.
 
-Once `pip` has finished downloading the dependencies:
+Once `pip` has finished downloading the dependencies, need to migrate for creating database files:
+
+```sh
+(venv)$ python manage.py makemigrations
+(venv)$ python manage.py migrate
+```
+
+This can be used to run the server
 
 ```sh
 (venv)$ python manage.py runserver
