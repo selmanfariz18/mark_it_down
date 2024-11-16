@@ -11,7 +11,6 @@ class UserTests(APITestCase):
         self.signup_url = reverse('signup')
 
     def test_user_signup(self):
-        """Test user can sign up successfully"""
         data = {
             "first_name": "John",
             "email": "john@example.com",
@@ -23,7 +22,6 @@ class UserTests(APITestCase):
         self.assertEqual(response.data['message'], 'Account created successfully')
 
     def test_signup_password_mismatch(self):
-        """Test signup fails when passwords do not match"""
         data = {
             "first_name": "Jane",
             "email": "jane@example.com",
@@ -43,14 +41,12 @@ class LoginTests(APITestCase):
         self.login_url = reverse('signin')
 
     def test_login_success(self):
-        """Test user can log in successfully"""
         data = {"email": "john@example.com", "password": "password123"}
         response = self.client.post(self.login_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('token', response.data)
 
     def test_login_invalid_password(self):
-        """Test login fails with wrong password"""
         data = {"email": "john@example.com", "password": "wrongpassword"}
         response = self.client.post(self.login_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -66,14 +62,12 @@ class ProjectTests(APITestCase):
         self.create_project_url = reverse('create_project')
 
     def test_create_project(self):
-        """Test project creation"""
         data = {"title": "New Project"}
         response = self.client.post(self.create_project_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['title'], "New Project")
 
     def test_create_project_no_title(self):
-        """Test project creation fails with no title"""
         response = self.client.post(self.create_project_url, {}, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('error', response.data)
@@ -91,14 +85,12 @@ class TaskTests(APITestCase):
         self.add_task_url = reverse('add_task', kwargs={'project_id': self.project.id})
 
     def test_add_task(self):
-        """Test adding a new task"""
         data = {"description": "New Task"}
         response = self.client.post(self.add_task_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['description'], "New Task")
 
     def test_add_task_no_description(self):
-        """Test adding task fails with no description"""
         response = self.client.post(self.add_task_url, {}, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('error', response.data)

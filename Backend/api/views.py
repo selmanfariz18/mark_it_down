@@ -49,7 +49,7 @@ class Signup(APIView):
         try:
             if email:
                 user = User.objects.create_user(
-                    username=first_name,
+                    username=email,
                     password=password,
                     first_name=first_name,
                     email=email
@@ -386,7 +386,7 @@ class UserProfileView(APIView):
             git_pac = ""
 
         return Response({
-            "username": user.username,
+            "username": user.first_name,
             "git_pac": git_pac
         }, status=200)
         
