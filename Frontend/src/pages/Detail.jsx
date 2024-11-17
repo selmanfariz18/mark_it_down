@@ -17,6 +17,8 @@ import { CgProfile } from "react-icons/cg";
 import { ImCross } from "react-icons/im";
 import { MdDelete } from "react-icons/md";
 
+const link = import.meta.env.VITE_API_URL;
+
 const Detail = () => {
   const [projectDetails, setProjectDetails] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -40,14 +42,11 @@ const Detail = () => {
 
   const fetchProjectDetails = async (token, projectId) => {
     try {
-      const response = await axios.get(
-        `http://localhost:8000/api/projects/${projectId}/`,
-        {
-          headers: {
-            Authorization: `Token ${token}`,
-          },
-        }
-      );
+      const response = await axios.get(`${link}/api/projects/${projectId}/`, {
+        headers: {
+          Authorization: `Token ${token}`,
+        },
+      });
 
       if (response.status === 200) {
         setProjectDetails(response.data);
@@ -75,7 +74,7 @@ const Detail = () => {
 
     try {
       const response = await axios.patch(
-        `http://localhost:8000/api/projects/${id}/update_title/`,
+        `${link}/api/projects/${id}/update_title/`,
         { title: editedTitle },
         {
           headers: {
@@ -108,7 +107,7 @@ const Detail = () => {
 
     try {
       const response = await axios.post(
-        `http://localhost:8000/api/projects/${id}/add_task/`,
+        `${link}/api/projects/${id}/add_task/`,
         { description: taskName },
         {
           headers: {
@@ -139,7 +138,7 @@ const Detail = () => {
     try {
       const newStatus = currentStatus === "done" ? "not_done" : "done";
       const response = await axios.patch(
-        `http://localhost:8000/api/tasks/${taskId}/update_status/`,
+        `${link}/api/tasks/${taskId}/update_status/`,
         {},
         {
           headers: {
@@ -170,7 +169,7 @@ const Detail = () => {
     const token = localStorage.getItem("token");
     try {
       const response = await axios.delete(
-        `http://localhost:8000/api/tasks/${taskId}/delete/`,
+        `${link}/api/tasks/${taskId}/delete/`,
         {
           headers: {
             Authorization: `Token ${token}`,
@@ -199,7 +198,7 @@ const Detail = () => {
 
     try {
       const response = await axios.patch(
-        `http://localhost:8000/api/tasks/${taskId}/update_description/`,
+        `${link}/api/tasks/${taskId}/update_description/`,
         { description: editedDescription },
         {
           headers: {
@@ -284,7 +283,7 @@ ${taskListMarkdownDone}
     const token = localStorage.getItem("token");
 
     try {
-      const response = await axios.get("http://localhost:8000/api/get_pac/", {
+      const response = await axios.get(link + "/api/get_pac/", {
         headers: {
           Authorization: `Token ${token}`,
         },

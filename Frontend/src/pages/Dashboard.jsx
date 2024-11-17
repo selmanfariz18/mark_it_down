@@ -12,6 +12,8 @@ import { TiPlus } from "react-icons/ti";
 import { MdDelete } from "react-icons/md";
 import { CgProfile } from "react-icons/cg";
 
+const link = import.meta.env.VITE_API_URL;
+
 const Dashboard = () => {
   const [projectName, setProjectName] = useState("");
   const [error, setError] = useState("");
@@ -31,7 +33,7 @@ const Dashboard = () => {
 
   const fetchProjects = async (token) => {
     try {
-      const response = await axios.get("http://localhost:8000/api/projects/", {
+      const response = await axios.get(link + "/api/projects/", {
         headers: {
           Authorization: `Token ${token}`,
         },
@@ -63,7 +65,7 @@ const Dashboard = () => {
     ) {
       try {
         const response = await axios.delete(
-          `http://localhost:8000/api/projects/${projectId}/delete/`,
+          `${link}/api/projects/${projectId}/delete/`,
           {
             headers: {
               Authorization: `Token ${token}`,
@@ -90,7 +92,7 @@ const Dashboard = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/create_project/",
+        link + "/api/create_project/",
         { title: projectName },
         {
           headers: {

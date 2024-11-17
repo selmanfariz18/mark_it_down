@@ -11,6 +11,8 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
 
+  const link = import.meta.env.VITE_API_URL;
+
   const validatePassword = (password) => {
     const passwordRegex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -34,7 +36,7 @@ const Register = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/signup/",
+        link + "/api/signup/",
         {
           first_name: name,
           email: email,

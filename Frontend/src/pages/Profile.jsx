@@ -10,6 +10,8 @@ import { RxAvatar } from "react-icons/rx";
 import { MdEdit } from "react-icons/md";
 import { TiTick } from "react-icons/ti";
 
+const link = import.meta.env.VITE_API_URL;
+
 const Profile = () => {
   const [username, setUsername] = useState("");
   const [gitPac, setGitPac] = useState("");
@@ -32,7 +34,7 @@ const Profile = () => {
 
   const fetchProfile = async (token) => {
     try {
-      const response = await axios.get("http://localhost:8000/api/profile/", {
+      const response = await axios.get(link + "/api/profile/", {
         headers: {
           Authorization: `Token ${token}`,
         },
@@ -50,7 +52,7 @@ const Profile = () => {
     const token = localStorage.getItem("token");
     try {
       const response = await axios.put(
-        "http://localhost:8000/api/profile/",
+        link + "/api/profile/",
         { git_pac: gitPac },
         {
           headers: {
