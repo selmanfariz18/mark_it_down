@@ -5,6 +5,12 @@ Django + React Todo management App
 - Can Download each Todo project as markdown file
 - Can Upload Todo project to Github Gists
 
+## Live Demo
+
+Site: <a href="https://mark-it-down-xi.vercel.app/" target="_blank" rel="noopener noreferrer">https://mark-it-down-xi.vercel.app/</a>
+
+Backend API: <a href="https://markitdown.pythonanywhere.com/api/" target="_blank" rel="noopener noreferrer">https://markitdown.pythonanywhere.com/api/</a>
+
 ## Setup
 
 The first thing to do is to clone the repository:
