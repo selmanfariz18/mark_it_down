@@ -80,6 +80,62 @@ const Dashboard = () => {
             prevProjects.filter((project) => project.id !== projectId)
           );
         }
+        fetchProjects(token);
+      } catch (error) {
+        toast.error("Failed to delete project");
+      }
+    }
+  };
+
+  const handleRestoreClick = async (event, projectId, projecttitle) => {
+    event.stopPropagation();
+    const token = localStorage.getItem("token");
+
+    try {
+      const response = await axios.delete(
+        `${link}/api/projects/${projectId}/restore/`,
+        {
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        }
+      );
+      if (response.status === 204) {
+        toast.success("Project deleted successfully!");
+        setProjects((prevProjects) =>
+          prevProjects.filter((project) => project.id !== projectId)
+        );
+      }
+      fetchProjects(token);
+    } catch (error) {
+      toast.error("Failed to restore project");
+    }
+  };
+
+  const handleActualDeleteClick = async (event, projectId, projecttitle) => {
+    event.stopPropagation();
+    const token = localStorage.getItem("token");
+    if (
+      window.confirm(
+        "Are you sure? you want to delete " + projecttitle + " project?"
+      )
+    ) {
+      try {
+        const response = await axios.delete(
+          `${link}/api/projects/${projectId}/actual_delete/`,
+          {
+            headers: {
+              Authorization: `Token ${token}`,
+            },
+          }
+        );
+        if (response.status === 204) {
+          toast.success("Project deleted successfully!");
+          setProjects((prevProjects) =>
+            prevProjects.filter((project) => project.id !== projectId)
+          );
+        }
+        fetchProjects(token);
       } catch (error) {
         toast.error("Failed to delete project");
       }
@@ -158,7 +214,7 @@ const Dashboard = () => {
                           <button
                             className="btn bg-white"
                             onClick={(event) =>
-                              handleDeleteClick(
+                              handleRestoreClick(
                                 event,
                                 project.id,
                                 project.title
@@ -166,6 +222,23 @@ const Dashboard = () => {
                             }
                           >
                             <LuRecycle
+                              style={{
+                                fontSize: "20px",
+                                backgroundColor: "white",
+                              }}
+                            />
+                          </button>
+                          <button
+                            className="btn bg-white"
+                            onClick={(event) =>
+                              handleActualDeleteClick(
+                                event,
+                                project.id,
+                                project.title
+                              )
+                            }
+                          >
+                            <MdDelete
                               style={{
                                 fontSize: "20px",
                                 backgroundColor: "white",
