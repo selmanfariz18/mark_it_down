@@ -348,6 +348,9 @@ ${taskListMarkdownDone}
   const uncheckedTasks = projectDetails.tasks.filter(
     (task) => task.status === "not_done"
   );
+
+  const deletedTasks = projectDetails.deleted_task;
+
   const AllTasks = projectDetails.tasks;
 
   return (
@@ -527,6 +530,14 @@ ${taskListMarkdownDone}
                       style={{ fontSize: "15px", backgroundColor: "white" }}
                     />
                   </button>
+                  <button
+                    className="btn btn-sm"
+                    onClick={() => handleDeleteTask(task.id)}
+                  >
+                    <MdDelete
+                      style={{ fontSize: "15px", backgroundColor: "white" }}
+                    />
+                  </button>
                 </>
               )}
             </div>
@@ -590,6 +601,32 @@ ${taskListMarkdownDone}
               <button
                 className="btn btn-sm"
                 onClick={() => handleDeleteTask(task.id)}
+              >
+                <MdDelete
+                  style={{ fontSize: "15px", backgroundColor: "white" }}
+                />
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <h4>Deleted tasks</h4>
+
+        {/* deleted data area */}
+        <div className="lists bg-white m-5 px-5">
+          {deletedTasks.map((deleted_task) => (
+            <div key={deleted_task.id} className="list d-flex bg-white">
+              <h5 className="mt-3 mx-2">
+                <s className="deleted">{deleted_task.description}</s>
+              </h5>
+              <p className="mt-3 mx-2 bg-white text-muted">
+                Last Updated:{" "}
+                {new Date(deleted_task.last_updated_on).toLocaleString()}
+              </p>
+              {/* Delete button */}
+              <button
+                className="btn btn-sm"
+                onClick={() => handleDeleteTask(deleted_task.id)}
               >
                 <MdDelete
                   style={{ fontSize: "15px", backgroundColor: "white" }}

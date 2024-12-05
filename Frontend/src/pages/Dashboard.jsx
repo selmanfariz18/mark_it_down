@@ -11,6 +11,8 @@ import { IoIosLogOut } from "react-icons/io";
 import { TiPlus } from "react-icons/ti";
 import { MdDelete } from "react-icons/md";
 import { CgProfile } from "react-icons/cg";
+import { ImBin } from "react-icons/im";
+import { LuRecycle } from "react-icons/lu";
 
 const link = import.meta.env.VITE_API_URL;
 
@@ -123,6 +125,68 @@ const Dashboard = () => {
       <div className="dashboard text-center m-3 mt-3 d-flex justify-content-between">
         <h1>Mark it Down</h1>
         <div className="d-flex">
+          <div className="popup_btn text-center">
+            <Popup
+              ref={popupRef}
+              //onClose={() => setIsOpen(false)}
+              trigger={
+                <button className="btn">
+                  {" "}
+                  <ImBin style={{ fontSize: "30px", marginTop: "5px" }} />
+                </button>
+              }
+              position="bottom right"
+              contentStyle={{
+                width: "400px",
+                // padding: "20px",
+                backgroundColor: "#f1f1f1",
+                textAlign: "center",
+              }}
+            >
+              <div className="project-list bg-white row m-3">
+                {projects.filter((project) => project.isDeleted).length > 0 ? (
+                  projects
+                    .filter((project) => project.isDeleted)
+                    .map((project) => (
+                      <div
+                        key={project.id}
+                        className="project-card card"
+                        onClick={() => handleCardClick(project.id)}
+                      >
+                        <div className="d-flex justify-content-between bg-white">
+                          <h5 className="bg-white">{project.title}</h5>
+                          <button
+                            className="btn bg-white"
+                            onClick={(event) =>
+                              handleDeleteClick(
+                                event,
+                                project.id,
+                                project.title
+                              )
+                            }
+                          >
+                            <LuRecycle
+                              style={{
+                                fontSize: "20px",
+                                backgroundColor: "white",
+                              }}
+                            />
+                          </button>
+                        </div>
+                        <p className="bg-white">
+                          Created on:{" "}
+                          {new Date(project.created_date).toLocaleString()}
+                        </p>
+                      </div>
+                    ))
+                ) : (
+                  <p className="bg-white mt-5 text-center">
+                    No projects available
+                  </p>
+                )}
+              </div>
+            </Popup>
+          </div>
           <button onClick={() => navigate("/profile")} className="btn">
             <CgProfile style={{ fontSize: "30px" }} />
           </button>
@@ -172,31 +236,34 @@ const Dashboard = () => {
         </div>
 
         <div className="project-list bg-white row">
-          {projects.length > 0 ? (
-            projects.map((project) => (
-              <div
-                key={project.id}
-                className="project-card card mb-2 p-3 col-md-3"
-                onClick={() => handleCardClick(project.id)}
-              >
-                <div className="d-flex justify-content-between bg-white">
-                  <h5 className="bg-white">{project.title}</h5>
-                  <button
-                    className="btn bg-white"
-                    onClick={(event) =>
-                      handleDeleteClick(event, project.id, project.title)
-                    }
-                  >
-                    <MdDelete
-                      style={{ fontSize: "20px", backgroundColor: "white" }}
-                    />
-                  </button>
+          {projects.filter((project) => !project.isDeleted).length > 0 ? (
+            projects
+              .filter((project) => !project.isDeleted)
+              .map((project) => (
+                <div
+                  key={project.id}
+                  className="project-card card mb-2 p-3 col-md-3"
+                  onClick={() => handleCardClick(project.id)}
+                >
+                  <div className="d-flex justify-content-between bg-white">
+                    <h5 className="bg-white">{project.title}</h5>
+                    <button
+                      className="btn bg-white"
+                      onClick={(event) =>
+                        handleDeleteClick(event, project.id, project.title)
+                      }
+                    >
+                      <MdDelete
+                        style={{ fontSize: "20px", backgroundColor: "white" }}
+                      />
+                    </button>
+                  </div>
+                  <p className="bg-white">
+                    Created on:{" "}
+                    {new Date(project.created_date).toLocaleString()}
+                  </p>
                 </div>
-                <p className="bg-white">
-                  Created on: {new Date(project.created_date).toLocaleString()}
-                </p>
-              </div>
-            ))
+              ))
           ) : (
             <p className="bg-white mt-5 text-center">No projects available</p>
           )}

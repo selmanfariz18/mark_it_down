@@ -155,7 +155,8 @@ class ProjectListView(APIView):
             {
                 "id": project.id,
                 "title": project.title,
-                "created_date": project.created_date
+                "created_date": project.created_date,
+                "isDeleted": project.isDeleted
             }
             for project in projects
         ]
@@ -174,8 +175,11 @@ class ProjectDeleteView(APIView):
         
         project = get_object_or_404(Project, id=project_id, created_by=user)
         
+        project.isDeleted=True
+        project.save()
         
-        project.delete()
+        
+        # project.delete()
         
         return Response(status=status.HTTP_204_NO_CONTENT)
     
@@ -192,11 +196,22 @@ class ProjectDetailView(APIView):
         
         project = get_object_or_404(Project, id=project_id, created_by=user)
 
-        tasks = Task.objects.filter(report = project)
+        tasks = Task.objects.filter(report = project, isDeleted=False)
 
         task_data = []
         for task in tasks:
             task_data.append({
+                "id": task.id,
+                "description": task.description,
+                "status": task.status,
+                "created_date": task.created_date,
+                "last_updated_on": task.last_updated_on
+            })
+            
+        deleted_tasks = Task.objects.filter(report = project, isDeleted=True)
+        deleted_task_data = []
+        for task in deleted_tasks:
+            deleted_task_data.append({
                 "id": task.id,
                 "description": task.description,
                 "status": task.status,
@@ -208,7 +223,8 @@ class ProjectDetailView(APIView):
             "id": project.id,
             "title": project.title,
             "created_date": project.created_date,
-            "tasks": task_data
+            "tasks": task_data,
+            "deleted_task": deleted_task_data
         }
 
         return Response(response_data, status=200)
@@ -366,7 +382,10 @@ class DeleteTaskView(APIView):
         if task.report.created_by != request.user:
             return Response({"detail": "You do not have permission to delete this task."}, status=403)
 
-        task.delete()
+        task.isDeleted=True
+        task.save()
+
+        # task.delete()
         return Response({"detail": "Task deleted successfully."}, status=204)
     
     
