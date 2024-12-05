@@ -425,6 +425,42 @@ class DeleteTaskView(APIView):
         # task.delete()
         return Response({"detail": "Task deleted successfully."}, status=204)
     
+class RestoreTaskView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, task_id):
+        try:
+            task = Task.objects.get(id=task_id)
+        except Task.DoesNotExist:
+            return Response({"detail": "Task not found."}, status=404)
+
+        if task.report.created_by != request.user:
+            return Response({"detail": "You do not have permission to delete this task."}, status=403)
+
+        task.isDeleted=False
+        task.save()
+
+        # task.delete()
+        return Response({"detail": "Task deleted successfully."}, status=204)
+    
+class DeleteActualTaskView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, task_id):
+        try:
+            task = Task.objects.get(id=task_id)
+        except Task.DoesNotExist:
+            return Response({"detail": "Task not found."}, status=404)
+
+        if task.report.created_by != request.user:
+            return Response({"detail": "You do not have permission to delete this task."}, status=403)
+
+
+        task.delete()
+        return Response({"detail": "Task deleted successfully."}, status=204)
+    
     
 # ===========Profile==================    
     

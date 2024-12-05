@@ -15,6 +15,8 @@ urlpatterns = [
     path('projects/<int:project_id>/restore/', views.ProjectRestoreView.as_view(), name='project_restore'),
     path('projects/<int:project_id>/actual_delete/', views.ProjectActualDeleteView.as_view(), name='project_actual_delete'),
     path('tasks/<int:task_id>/delete/', views.DeleteTaskView.as_view(), name='delete-task'),
+    path('tasks/<int:task_id>/restore/', views.RestoreTaskView.as_view(), name='restore-task'),
     path('tasks/<int:task_id>/update_status/', views.UpdateTaskStatusView.as_view(), name='update_task_status'),
     path('tasks/<int:task_id>/update_description/', views.UpdateTaskDescriptionView.as_view(), name='update_task_description'),
+    path('tasks/<int:task_id>/actual_delete/', views.DeleteActualTaskView.as_view(), name='delete-actual-task'),
 ]

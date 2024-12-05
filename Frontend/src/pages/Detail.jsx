@@ -15,7 +15,12 @@ import { TiPlus } from "react-icons/ti";
 import { MdFileUpload } from "react-icons/md";
 import { CgProfile } from "react-icons/cg";
 import { ImCross } from "react-icons/im";
-import { MdDelete } from "react-icons/md";
+import {
+  MdDelete,
+  MdKeyboardArrowDown,
+  MdKeyboardArrowUp,
+} from "react-icons/md";
+import { LuRecycle } from "react-icons/lu";
 
 const link = import.meta.env.VITE_API_URL;
 
@@ -27,6 +32,7 @@ const Detail = () => {
   const [editedDescription, setEditedDescription] = useState("");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { id } = useParams();
   const navigate = useNavigate();
   const popupRef = useRef();
@@ -178,10 +184,64 @@ const Detail = () => {
       );
 
       if (response.status === 204) {
-        setProjectDetails((prevDetails) => ({
-          ...prevDetails,
-          tasks: prevDetails.tasks.filter((task) => task.id !== taskId),
-        }));
+        setProjectDetails((prevDetails) => {
+          const updatedTasks = prevDetails.tasks.map((task) =>
+            task.id === taskId ? { ...task, status: newStatus } : task
+          );
+          return { ...prevDetails, tasks: updatedTasks };
+        });
+        toast.success("Task deleted successfully!");
+      }
+    } catch (error) {
+      toast.error("Failed to delete task.");
+    }
+  };
+
+  const handleRestoreTask = async (taskId) => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await axios.delete(
+        `${link}/api/tasks/${taskId}/restore/`,
+        {
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 204) {
+        setProjectDetails((prevDetails) => {
+          const updatedTasks = prevDetails.tasks.map((task) =>
+            task.id === taskId ? { ...task, status: newStatus } : task
+          );
+          return { ...prevDetails, tasks: updatedTasks };
+        });
+        toast.success("Task restored successfully!");
+      }
+    } catch (error) {
+      toast.error("Failed to delete task.");
+    }
+  };
+
+  const handleActualDeleteTask = async (taskId) => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await axios.delete(
+        `${link}/api/tasks/${taskId}/actual_delete/`,
+        {
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 204) {
+        setProjectDetails((prevDetails) => {
+          const updatedTasks = prevDetails.tasks.map((task) =>
+            task.id === taskId ? { ...task, status: newStatus } : task
+          );
+          return { ...prevDetails, tasks: updatedTasks };
+        });
         toast.success("Task deleted successfully!");
       }
     } catch (error) {
@@ -352,6 +412,10 @@ ${taskListMarkdownDone}
   const deletedTasks = projectDetails.deleted_task;
 
   const AllTasks = projectDetails.tasks;
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
 
   return (
     <>
@@ -610,31 +674,57 @@ ${taskListMarkdownDone}
           ))}
         </div>
 
-        <h4>Deleted tasks</h4>
-
-        {/* deleted data area */}
-        <div className="lists bg-white m-5 px-5">
-          {deletedTasks.map((deleted_task) => (
-            <div key={deleted_task.id} className="list d-flex bg-white">
-              <h5 className="mt-3 mx-2">
-                <s className="deleted">{deleted_task.description}</s>
-              </h5>
-              <p className="mt-3 mx-2 bg-white text-muted">
-                Last Updated:{" "}
-                {new Date(deleted_task.last_updated_on).toLocaleString()}
-              </p>
-              {/* Delete button */}
-              <button
-                className="btn btn-sm"
-                onClick={() => handleDeleteTask(deleted_task.id)}
-              >
-                <MdDelete
-                  style={{ fontSize: "15px", backgroundColor: "white" }}
-                />
-              </button>
+        {deletedTasks.length > 0 && (
+          <div className="deleted-task-dropdown bg-white m-5 px-5">
+            <div
+              className="dropdown-header d-flex justify-content-between align-items-center bg-light p-3"
+              onClick={toggleDropdown}
+              style={{ cursor: "pointer" }}
+            >
+              <h5 className="m-0">Deleted Tasks</h5>
+              {isDropdownOpen ? (
+                <MdKeyboardArrowUp style={{ fontSize: "20px" }} />
+              ) : (
+                <MdKeyboardArrowDown style={{ fontSize: "20px" }} />
+              )}
             </div>
-          ))}
-        </div>
+
+            {/* Dropdown content */}
+            {isDropdownOpen && (
+              <div className="lists bg-white px-5">
+                {deletedTasks.map((deleted_task) => (
+                  <div key={deleted_task.id} className="list d-flex bg-white">
+                    <h5 className="mt-3 mx-2">
+                      <s className="deleted">{deleted_task.description}</s>
+                    </h5>
+                    <p className="mt-3 mx-2 bg-white text-muted">
+                      Last Updated:{" "}
+                      {new Date(deleted_task.last_updated_on).toLocaleString()}
+                    </p>
+                    <button
+                      className="btn btn-sm"
+                      onClick={() => handleRestoreTask(deleted_task.id)}
+                    >
+                      <LuRecycle
+                        style={{ fontSize: "15px", backgroundColor: "white" }}
+                      />
+                    </button>
+                    {/* Delete button */}
+
+                    <button
+                      className="btn btn-sm"
+                      onClick={() => handleActualDeleteTask(deleted_task.id)}
+                    >
+                      <MdDelete
+                        style={{ fontSize: "15px", backgroundColor: "white" }}
+                      />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </>
   );
