@@ -177,20 +177,27 @@ const Detail = () => {
       const response = await axios.delete(
         `${link}/api/tasks/${taskId}/delete/`,
         {
-          headers: {
-            Authorization: `Token ${token}`,
-          },
+          headers: { Authorization: `Token ${token}` },
         }
       );
 
       if (response.status === 204) {
         setProjectDetails((prevDetails) => {
-          const updatedTasks = prevDetails.tasks.map((task) =>
-            task.id === taskId ? { ...task, status: newStatus } : task
+          const updatedTasks = prevDetails.tasks.filter(
+            (task) => task.id !== taskId
           );
-          return { ...prevDetails, tasks: updatedTasks };
+          const deletedTask = prevDetails.tasks.find(
+            (task) => task.id === taskId
+          );
+
+          return {
+            ...prevDetails,
+            tasks: updatedTasks,
+            deleted_task: [...prevDetails.deleted_task, deletedTask],
+          };
         });
-        toast.success("Task deleted successfully!");
+        toast.success("Task moved to Recycle Bin!");
+        fetchProjectDetails(token, id);
       }
     } catch (error) {
       toast.error("Failed to delete task.");
@@ -200,26 +207,33 @@ const Detail = () => {
   const handleRestoreTask = async (taskId) => {
     const token = localStorage.getItem("token");
     try {
-      const response = await axios.delete(
+      const response = await axios.patch(
         `${link}/api/tasks/${taskId}/restore/`,
+        {},
         {
-          headers: {
-            Authorization: `Token ${token}`,
-          },
+          headers: { Authorization: `Token ${token}` },
         }
       );
 
-      if (response.status === 204) {
+      if (response.status === 200) {
         setProjectDetails((prevDetails) => {
-          const updatedTasks = prevDetails.tasks.map((task) =>
-            task.id === taskId ? { ...task, status: newStatus } : task
+          const updatedDeletedTasks = prevDetails.deleted_task.filter(
+            (task) => task.id !== taskId
           );
-          return { ...prevDetails, tasks: updatedTasks };
+          const restoredTask = prevDetails.deleted_task.find(
+            (task) => task.id === taskId
+          );
+
+          return {
+            ...prevDetails,
+            tasks: [...prevDetails.tasks, restoredTask],
+            deleted_task: updatedDeletedTasks,
+          };
         });
         toast.success("Task restored successfully!");
       }
     } catch (error) {
-      toast.error("Failed to delete task.");
+      toast.error("Failed to restore task.");
     }
   };
 
@@ -229,23 +243,25 @@ const Detail = () => {
       const response = await axios.delete(
         `${link}/api/tasks/${taskId}/actual_delete/`,
         {
-          headers: {
-            Authorization: `Token ${token}`,
-          },
+          headers: { Authorization: `Token ${token}` },
         }
       );
 
       if (response.status === 204) {
         setProjectDetails((prevDetails) => {
-          const updatedTasks = prevDetails.tasks.map((task) =>
-            task.id === taskId ? { ...task, status: newStatus } : task
+          const updatedDeletedTasks = prevDetails.deleted_task.filter(
+            (task) => task.id !== taskId
           );
-          return { ...prevDetails, tasks: updatedTasks };
+
+          return {
+            ...prevDetails,
+            deleted_task: updatedDeletedTasks,
+          };
         });
-        toast.success("Task deleted successfully!");
+        toast.success("Task permanently deleted!");
       }
     } catch (error) {
-      toast.error("Failed to delete task.");
+      toast.error("Failed to delete task permanently.");
     }
   };
 
