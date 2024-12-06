@@ -207,15 +207,14 @@ const Detail = () => {
   const handleRestoreTask = async (taskId) => {
     const token = localStorage.getItem("token");
     try {
-      const response = await axios.patch(
+      const response = await axios.delete(
         `${link}/api/tasks/${taskId}/restore/`,
-        {},
         {
           headers: { Authorization: `Token ${token}` },
         }
       );
 
-      if (response.status === 200) {
+      if (response.status === 204) {
         setProjectDetails((prevDetails) => {
           const updatedDeletedTasks = prevDetails.deleted_task.filter(
             (task) => task.id !== taskId
